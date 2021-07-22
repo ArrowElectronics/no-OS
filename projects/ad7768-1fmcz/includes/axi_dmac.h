@@ -1,9 +1,9 @@
 /***************************************************************************//**
- *   @file   parameters.h
- *   @brief  Parameters Definitions.
- *   @author Antoniu Miclaus (antoniu.miclaus@analog.com)
+ *   @file   axi_dmac.h
+ *   @brief  Driver for the Analog Devices AXI-DMAC core.
+ *   @author DBogdan (dragos.bogdan@analog.com)
 ********************************************************************************
- * Copyright 2020(c) Analog Devices, Inc.
+ * Copyright 2018(c) Analog Devices, Inc.
  *
  * All rights reserved.
  *
@@ -36,32 +36,77 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-#ifndef __PARAMETERS_H__
-#define __PARAMETERS_H__
+#ifndef AXI_DMAC_H_
+#define AXI_DMAC_H_
 
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include <xparameters.h>
+#include <stdint.h>
+#include "util.h"
 
 /******************************************************************************/
 /********************** Macros and Constants Definitions **********************/
 /******************************************************************************/
-#define AD77681_EVB_SAMPLE_NO				8
-#define AD77681_DMA_1_BASEADDR				XPAR_AXI_AD77681_DMA_BASEADDR
-#define AD77681_SPI1_ENGINE_BASEADDR		XPAR_SPI_ADC_AXI_REGMAP_BASEADDR
-#define AD77681_SPI_CS						0
-#define AD77681_SPI_ENG_REF_CLK_FREQ_HZ		80000000
+#define AXI_DMAC_REG_IRQ_MASK		0x80
+#define AXI_DMAC_REG_IRQ_PENDING	0x84
+#define AXI_DMAC_IRQ_SOT			BIT(0)
+#define AXI_DMAC_IRQ_EOT			BIT(1)
 
-#define GPIO_DEVICE_ID						XPAR_PS7_GPIO_0_DEVICE_ID
-#define GPIO_OFFSET							32
+#define AXI_DMAC_REG_CTRL			0x400
+#define AXI_DMAC_CTRL_ENABLE		BIT(0)
+#define AXI_DMAC_CTRL_PAUSE			BIT(1)
 
-#define GPIO_0_0							GPIO_OFFSET + 6 // 38
-#define GPIO_0_1							GPIO_OFFSET + 5 // 37
-#define GPIO_0_2							GPIO_OFFSET + 4 // 36
-#define GPIO_0_3							GPIO_OFFSET + 3 // 35
-#define GPIO_0_SYNC_IN						GPIO_OFFSET + 2 // 34
-#define GPIO_0_SYNC_OUT						GPIO_OFFSET + 1 // 33
-#define GPIO_0_RESET						GPIO_OFFSET + 0 // 32
+#define AXI_DMAC_REG_TRANSFER_ID	0x404
+#define AXI_DMAC_REG_START_TRANSFER	0x408
+#define AXI_DMAC_REG_FLAGS			0x40c
+#define AXI_DMAC_REG_DEST_ADDRESS	0x410
+#define AXI_DMAC_REG_SRC_ADDRESS	0x414
+#define AXI_DMAC_REG_X_LENGTH		0x418
+#define AXI_DMAC_REG_Y_LENGTH		0x41c
+#define AXI_DMAC_REG_DEST_STRIDE	0x420
+#define AXI_DMAC_REG_SRC_STRIDE		0x424
+#define AXI_DMAC_REG_TRANSFER_DONE	0x428
 
-#endif /* PARAMETERS_H_ */
+/******************************************************************************/
+/*************************** Types Declarations *******************************/
+/******************************************************************************/
+enum dma_direction {
+	DMA_DEV_TO_MEM,
+	DMA_MEM_TO_DEV
+};
+
+enum dma_flags {
+	DMA_CYCLIC = 1,
+	DMA_LAST = 2
+};
+
+struct axi_dmac {
+	const char *name;
+	uint32_t base;
+	enum dma_direction direction;
+	uint32_t flags;
+};
+
+struct axi_dmac_init {
+	const char *name;
+	uint32_t base;
+	enum dma_direction direction;
+	uint32_t flags;
+};
+
+/******************************************************************************/
+/************************ Functions Declarations ******************************/
+/******************************************************************************/
+int32_t axi_dmac_read(struct axi_dmac *dmac, uint32_t reg_addr,
+		      uint32_t *reg_data);
+int32_t axi_dmac_write(struct axi_dmac *dmac, uint32_t reg_addr,
+		       uint32_t reg_data);
+int32_t axi_dmac_transfer(struct axi_dmac *dmac,
+			  uint32_t address, uint32_t size);
+int32_t axi_dmac_init(struct axi_dmac **adc_core,
+		      const struct axi_dmac_init *init);
+int32_t axi_dmac_remove(struct axi_dmac *dmac);
+void axi_wait(struct axi_dmac *dmac);
+
+#endif
