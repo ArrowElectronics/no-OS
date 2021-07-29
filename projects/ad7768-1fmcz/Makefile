@@ -76,6 +76,5 @@ $(ELF): $(OBJ)
 
 $(BIN): $(ELF)
 	$(OC) -O binary $(ELF) $(BIN)
-	#$(MKI) -A arm -O u-boot -T standalone -C none -a 0x00100040 -e 0x00100040 -n "baremetalapp" -d $(BIN)  $(BIN).img
-
+	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "Custom Script" -d custom_script.txt u-boot.scr
 
