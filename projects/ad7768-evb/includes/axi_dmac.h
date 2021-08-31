@@ -1,9 +1,9 @@
 /***************************************************************************//**
- *   @file   app_iio.h
- *   @brief  Application IIO setup.
- *   @author Antoniu Miclaus (antoniu.miclaus@analog.com)
+ *   @file   axi_dmac.h
+ *   @brief  Driver for the Analog Devices AXI-DMAC core.
+ *   @author DBogdan (dragos.bogdan@analog.com)
 ********************************************************************************
- * Copyright 2020(c) Analog Devices, Inc.
+ * Copyright 2018(c) Analog Devices, Inc.
  *
  * All rights reserved.
  *
@@ -36,20 +36,77 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-#ifndef APP_IIO_H_
-#define APP_IIO_H_
+#ifndef AXI_DMAC_H_
+#define AXI_DMAC_H_
 
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include <stdint.h>
-#include "iio_axi_adc.h"
+#include "util.h"
+
+/******************************************************************************/
+/********************** Macros and Constants Definitions **********************/
+/******************************************************************************/
+#define AXI_DMAC_REG_IRQ_MASK		0x80
+#define AXI_DMAC_REG_IRQ_PENDING	0x84
+#define AXI_DMAC_IRQ_SOT			BIT(0)
+#define AXI_DMAC_IRQ_EOT			BIT(1)
+
+#define AXI_DMAC_REG_CTRL			0x400
+#define AXI_DMAC_CTRL_ENABLE		BIT(0)
+#define AXI_DMAC_CTRL_PAUSE			BIT(1)
+
+#define AXI_DMAC_REG_TRANSFER_ID	0x404
+#define AXI_DMAC_REG_START_TRANSFER	0x408
+#define AXI_DMAC_REG_FLAGS			0x40c
+#define AXI_DMAC_REG_DEST_ADDRESS	0x410
+#define AXI_DMAC_REG_SRC_ADDRESS	0x414
+#define AXI_DMAC_REG_X_LENGTH		0x418
+#define AXI_DMAC_REG_Y_LENGTH		0x41c
+#define AXI_DMAC_REG_DEST_STRIDE	0x420
+#define AXI_DMAC_REG_SRC_STRIDE		0x424
+#define AXI_DMAC_REG_TRANSFER_DONE	0x428
+
+/******************************************************************************/
+/*************************** Types Declarations *******************************/
+/******************************************************************************/
+enum dma_direction {
+	DMA_DEV_TO_MEM,
+	DMA_MEM_TO_DEV
+};
+
+enum dma_flags {
+	DMA_CYCLIC = 1,
+	DMA_LAST = 2
+};
+
+struct axi_dmac {
+	const char *name;
+	uint32_t base;
+	enum dma_direction direction;
+	uint32_t flags;
+};
+
+struct axi_dmac_init {
+	const char *name;
+	uint32_t base;
+	enum dma_direction direction;
+	uint32_t flags;
+};
 
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
 /******************************************************************************/
-
-/* @brief Application IIO setup. */
-int32_t iio_app_start(struct iio_axi_adc_init_param *adc_init);
+int32_t axi_dmac_read(struct axi_dmac *dmac, uint32_t reg_addr,
+		      uint32_t *reg_data);
+int32_t axi_dmac_write(struct axi_dmac *dmac, uint32_t reg_addr,
+		       uint32_t reg_data);
+int32_t axi_dmac_transfer(struct axi_dmac *dmac,
+			  uint32_t address, uint32_t size);
+int32_t axi_dmac_init(struct axi_dmac **adc_core,
+		      const struct axi_dmac_init *init);
+int32_t axi_dmac_remove(struct axi_dmac *dmac);
+void axi_wait(struct axi_dmac *dmac);
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************//**
- *   @file   parameters.h
- *   @brief  Platform dependent parameters.
+ *   @file   spi.c
+ *   @brief  Implementation of the SPI Interface
  *   @author Antoniu Miclaus (antoniu.miclaus@analog.com)
 ********************************************************************************
  * Copyright 2020(c) Analog Devices, Inc.
@@ -37,44 +37,83 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _PARAMETERS_H_
-#define _PARAMETERS_H_
+#include <inttypes.h>
+#include <stdio.h>
+#include "includes/spi.h"
+#include <stdlib.h>
+#include "includes/error.h"
 
-#include <xparameters.h>
+/**
+ * @brief Initialize the SPI communication peripheral.
+ * @param desc - The SPI descriptor.
+ * @param param - The structure that contains the SPI parameters.
+ * @return SUCCESS in case of success, FAILURE otherwise.
+ */
+int32_t spi_init(struct spi_desc **desc,
+		 const struct spi_init_param *param)
+{
+	if (!param)
+		return FAILURE;
 
-#define SPI_DEVICE_ID				XPAR_PS7_SPI_0_DEVICE_ID
-#define SPI_AD7768_CS				0
-#define GPIO_DEVICE_ID				XPAR_PS7_GPIO_0_DEVICE_ID
-#define GPIO_OFFSET					32 + 54
-#define AD7768_DMA_BASEADDR			XPAR_AD7768_DMA_BASEADDR
-#define ADC_DDR_BASEADDR			XPAR_DDR_MEM_BASEADDR + 0x800000
-#define AD7768_ADC_BASEADDR			XPAR_AXI_AD7768_ADC_BASEADDR
-#define UART_DEVICE_ID				XPAR_XUARTPS_0_DEVICE_ID
-#define UART_IRQ_ID				XPAR_XUARTPS_1_INTR
-#define INTC_DEVICE_ID				XPAR_SCUGIC_SINGLE_DEVICE_ID
-#define GPIO_RESET_N				GPIO_OFFSET + 8
-#define GPIO_START_N				GPIO_OFFSET + 9
-#define GPIO_SYNC_IN_N				GPIO_OFFSET + 10
-#define GPIO_SYNC_OUT_N				GPIO_OFFSET + 11
-#define GPIO_MODE_0_GPIO_0			GPIO_OFFSET + 16
-#define GPIO_MODE_1_GPIO_1			GPIO_OFFSET + 17
-#define GPIO_MODE_2_GPIO_2			GPIO_OFFSET + 18
-#define GPIO_MODE_3_GPIO_3			GPIO_OFFSET + 19
-#define GPIO_FILTER_GPIO_4			GPIO_OFFSET + 20
-#define AD7768_HEADER_SIZE			8
-#define BITS_IN_BYTE				8
-#define AD7768_EVB_REFERENCE_VOLT		4.096f
+	if ((param->platform_ops->init(desc, param)))
+		return FAILURE;
 
-/* HDL Control Interface */
+	(*desc)->platform_ops = param->platform_ops;
 
-#define GPIO_UP_SSHOT				GPIO_OFFSET + 4
-#define GPIO_UP_FORMAT_1			GPIO_OFFSET + 3
-#define GPIO_UP_FORMAT_0			GPIO_OFFSET + 2
-#define GPIO_UP_CRC_ENABLE			GPIO_OFFSET + 1
-#define GPIO_UP_CRC_4_OR_16_N		GPIO_OFFSET + 0
-#define GPIO_STATUS_DEVICE_ID		XPAR_AD7768_GPIO_DEVICE_ID
-#define GPIO_STATUS_OFFSET			0
-#define UP_STATUS_CLR_OFFSET		GPIO_STATUS_OFFSET + 0
-#define UP_STATUS_OFFSET			GPIO_STATUS_OFFSET + 0
+	return SUCCESS;
+}
 
-#endif /* _PARAMETERS_H_ */
+/**
+ * @brief Free the resources allocated by spi_init().
+ * @param desc - The SPI descriptor.
+ * @return SUCCESS in case of success, FAILURE otherwise.
+ */
+int32_t spi_remove(struct spi_desc *desc)
+{
+	return desc->platform_ops->remove(desc);
+}
+
+/**
+ * @brief Write and read data to/from SPI.
+ * @param desc - The SPI descriptor.
+ * @param data - The buffer with the transmitted/received data.
+ * @param bytes_number - Number of bytes to write/read.
+ * @return SUCCESS in case of success, FAILURE otherwise.
+ */
+int32_t spi_write_and_read(struct spi_desc *desc,
+			   uint16_t *data,
+			   uint16_t bytes_number)
+{
+	return desc->platform_ops->write_and_read(desc, data, bytes_number);
+}
+
+/**
+ * @brief  Iterate over head list and send all spi messages
+ * @param desc - The SPI descriptor.
+ * @param msgs - Array of messages.
+ * @param len - Number of messages in the array.
+ * @return SUCCESS in case of success, negativ error code otherwise.
+ */
+/*
+int32_t spi_transfer(struct spi_desc *desc, struct spi_msg *msgs, uint32_t len)
+{
+	int32_t  ret;
+	uint32_t i;
+
+	if (!desc || !desc->platform_ops)
+		return -EINVAL;
+
+	if (desc->platform_ops->transfer)
+		return desc->platform_ops->transfer(desc, msgs, len);
+
+	for (i = 0; i < len; i++) {
+		if (msgs[i].rx_buff != msgs[i].tx_buff || !msgs[i].tx_buff)
+			return -EINVAL;
+		ret = spi_write_and_read(desc, msgs[i].rx_buff,
+					 msgs[i].bytes_number);
+		if (IS_ERR_VALUE(ret))
+			return ret;
+	}
+
+	return ret;
+}*/
