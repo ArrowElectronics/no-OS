@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 		/* Configuration */
 		.conv_mode = TWO_WIRE_MODE,		// Two/One-Wire Mode
 		.ref_sel = INT_REF,
-		.resolution = DEFAULT_RES_BIT, 	// Default/High Resolution
+		.resolution = DEFAULT_RES_BIT, 		// Default/High Resolution
 		.dcache_invalidate_range =
 		(void (*)(void *, size_t))alt_cache_system_invalidate,
 	};
@@ -142,26 +142,28 @@ int main(int argc, char** argv)
 	while (true) {
 		data = ad738x_read_data(dev, AD7381_EVB_SAMPLE_NO, DMA_TRANSFER_SIZE);
 
-	if (dev->conv_mode == TWO_WIRE_MODE) {
-		for (i = 0; i < AD7381_EVB_SAMPLE_NO; i++)
-			printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i] & 0x3FFF),
-														(uint16_t)((data[i] >> 16) & 0x3FFF));
-	}
-	else {
-		for (i = 0; i < AD7381_EVB_SAMPLE_NO; i += 2)
-			printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i] & 0x3FFF),
-															(uint16_t)(data[i+1] & 0x3FFF));
-	}
+		if (dev->conv_mode == TWO_WIRE_MODE) {
+			for (i = 0; i < AD7381_EVB_SAMPLE_NO; i++)
+				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i] & 0x3FFF),
+										(uint16_t)((data[i] >> 16) & 0x3FFF));
+		}
+		else {
+			// Discard the first two samples
+			for (i = 2; i < AD7381_EVB_SAMPLE_NO; i += 2)
+				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i] & 0x3FFF),
+										(uint16_t)(data[i+1] & 0x3FFF));
+		}
 
-	/* To use the High Resolution mode comment out the above block
-	 * and uncomment the following block */
+		/* To use the High Resolution mode comment out the above block
+		 * and uncomment the following block */
 
 /*		if (dev->conv_mode == TWO_WIRE_MODE) {
 			for (i = 0; i < AD7381_EVB_SAMPLE_NO; i++)
 				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i]), (uint16_t)(data[i] >> 16));
 		}
 		else {
-			for (i = 0; i < AD7381_EVB_SAMPLE_NO; i += 2) {
+			// Discard the first two samples
+			for (i = 2; i < AD7381_EVB_SAMPLE_NO; i += 2) {
 				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)data[i], (uint16_t)data[i+1]);
 				continue;
 			}

@@ -70,8 +70,8 @@ void cache_fun();
 #define SUCCESS		0
 #define FAILURE		-1
 
-#define SPI_ENGINE_OFFLOAD_EXAMPLE				1
-#define DMA_TRANSFER_SIZE						1024
+#define SPI_ENGINE_OFFLOAD_EXAMPLE			1
+#define DMA_TRANSFER_SIZE				1024
 
 int __auto_semihosting;
 int main(int argc, char** argv)
@@ -147,10 +147,12 @@ int main(int argc, char** argv)
 				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)(data[i]), (uint16_t)(data[i] >> 32));
 		}
 		else {
-			for (i = 0; i < AD7380_EVB_SAMPLE_NO; i += 2)
+			// Discard the first two samples
+			for (i = 2; i < AD7380_EVB_SAMPLE_NO; i += 2)
 				printf("ADC0 sample: 0x%x\tADC1 sample: 0x%x\r\n", (uint16_t)data[i], (uint16_t)data[i+1]);
 
 		}
+
 
 		/* To use the High Resolution mode comment out the above block
 		 * and uncomment the following block */
@@ -158,12 +160,13 @@ int main(int argc, char** argv)
 /*		if (dev->conv_mode == TWO_WIRE_MODE) {
 			for (i = 0; i < AD7380_EVB_SAMPLE_NO; i++)
 				printf("ADC0 sample: 0x%lx\tADC1 sample: 0x%lx\r\n", (uint32_t)(data[i] & 0x3FFFF),
-																(uint32_t)((data[i] >> 32) & 0x3FFFF));
+											(uint32_t)((data[i] >> 32) & 0x3FFFF));
 		}
 		else {
-			for (i = 0; i < AD7380_EVB_SAMPLE_NO; i += 2) {
+			// Discard the first two samples
+			for (i = 2; i < AD7380_EVB_SAMPLE_NO; i += 2) {
 				printf("ADC0 sample: 0x%lx\tADC1 sample: 0x%lx\r\n", (uint32_t)(data[i] & 0x3FFFF),
-																	(uint32_t)(data[i+1] & 0x3FFFF));
+											(uint32_t)(data[i+1] & 0x3FFFF));
 				continue;
 			}
 		}

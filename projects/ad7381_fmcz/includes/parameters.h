@@ -48,13 +48,13 @@
 /********************** Macros and Constants Definitions **********************/
 /******************************************************************************/
 
-#define AD7381_DMA_BASEADDR					0xff250000
+#define AD7381_DMA_BASEADDR				0xff250000
 #define AD7381_SPI_ENGINE_BASEADDR			0xff240000
 
-#define AD7381_EVB_SAMPLE_NO				100
+#define AD7381_EVB_SAMPLE_NO				4
 
 // SPI Serial Interface
-#define AD7381_SPI_CS						0
-#define AD7381_SPI_ENG_REF_CLK_FREQ_HZ		100000000
+#define AD7381_SPI_CS					0
+#define AD7381_SPI_ENG_REF_CLK_FREQ_HZ			100000000
 
 #endif /* PARAMETERS_H_ */
