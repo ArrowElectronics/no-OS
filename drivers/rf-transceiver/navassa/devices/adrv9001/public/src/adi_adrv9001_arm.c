@@ -118,7 +118,6 @@ int32_t adi_adrv9001_arm_StartStatus_Check(adi_adrv9001_Device_t *device, uint32
         timeout_us : ADI_ADRV9001_GETARMBOOTUP_INTERVAL_US;
     numEventChecks = (waitInterval_us == 0) ? 1 : (timeout_us / waitInterval_us);
 
-
     for (eventCheck = 0; eventCheck <= numEventChecks; eventCheck++)
     {
         ADI_EXPECT(adi_adrv9001_Radio_State_Get, device, &state);
@@ -553,7 +552,7 @@ int32_t adi_adrv9001_arm_CmdStatusOpcode_Get(adi_adrv9001_Device_t *device, uint
 
     /* calculating command status register offset based on opcode status packing */
     cmdByteIndex = opCode >> 2;
-
+    printf("waiting to get ADRV9001_ADDR_ARM_CMD_STATUS_0...\r\n");
     /* reading the command status register for given opcode */
     ADRV9001_SPIREADBYTE(device, "", ((uint16_t)ADRV9001_ADDR_ARM_CMD_STATUS_0 + cmdByteIndex), &cmdByte);
 
@@ -645,6 +644,7 @@ int32_t adi_adrv9001_arm_CmdStatus_Wait(adi_adrv9001_Device_t *device,
             break;
         }
     }
+    printf("\r\n");
 
     /* if ARM Command did not complete within the timeout period */
     if ((*cmdStatusByte & ARM_PENDING) > 0)

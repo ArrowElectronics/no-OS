@@ -47,6 +47,7 @@
 #include "error.h"
 #include "spi.h"
 #include "spi_extra.h"
+#include "axi_io.h"
 
 /******************************************************************************/
 /************************ Functions Definitions *******************************/
@@ -125,7 +126,7 @@ int32_t altera_spi_write_and_read(struct spi_desc *desc,
 				  uint8_t *data,
 				  uint16_t bytes_number)
 {
-	uint32_t i;
+    uint32_t pdata,rxdata=0,i;
 	struct altera_spi_desc *altera_desc;
 
 	altera_desc = desc->extra;
@@ -156,7 +157,35 @@ int32_t altera_spi_write_and_read(struct spi_desc *desc,
 		IOWR_32DIRECT(altera_desc->base_address,
 			      (ALTERA_AVALON_SPI_CONTROL_REG * 4), 0x000);
 
-		break;
+        break;
+    case ALTERA_SPI:
+        //pr_debug("altera_spi_write_and_read E 0x%x",(unsigned)altera_desc->base_address);
+        axi_io_write(altera_desc->base_address,
+                     (ALTERA_AVALON_SPI_CONTROL_REG * 4), ALTERA_AVALON_SPI_CONTROL_SSO_MSK);
+        axi_io_write(altera_desc->base_address,
+                     (ALTERA_AVALON_SPI_SLAVE_SEL_REG * 4), (0x1 << (desc->chip_select)));
+        for (i = 0; i < bytes_number; i++) {
+            do {
+                axi_io_read(altera_desc->base_address,
+                            (ALTERA_AVALON_SPI_STATUS_REG * 4), &pdata);
+            }while((pdata & ALTERA_AVALON_SPI_STATUS_TRDY_MSK) == 0x00);
+            axi_io_write(altera_desc->base_address,
+                         (ALTERA_AVALON_SPI_TXDATA_REG * 4), *(data + i));
+            do {
+                axi_io_read(altera_desc->base_address,
+                            (ALTERA_AVALON_SPI_STATUS_REG * 4), &pdata);
+            }while((pdata & ALTERA_AVALON_SPI_STATUS_RRDY_MSK) == 0x00);
+            //                axi_io_read(altera_desc->base_address, (ALTERA_AVALON_SPI_RXDATA_REG * 4), *(data + i));
+            axi_io_read(altera_desc->base_address,
+                        (ALTERA_AVALON_SPI_RXDATA_REG * 4), &rxdata);
+            data[i] = (uint8_t)rxdata;
+        }
+        axi_io_write(altera_desc->base_address,
+                     (ALTERA_AVALON_SPI_SLAVE_SEL_REG * 4), 0x000);
+        axi_io_write(altera_desc->base_address,
+                     (ALTERA_AVALON_SPI_CONTROL_REG * 4), 0x000);
+
+        break;
 	default:
 		return FAILURE;
 	}

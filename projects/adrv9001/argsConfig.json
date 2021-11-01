@@ -1,0 +1,29 @@
+{
+  
+   "_comment1": "device_mode : 'MIMO=0' 'INDEPNEDENT ToDo not supported'",
+   "_comment2": "src_select :  'DDS Tone=0' 'DAC Buffer=2' Normal Mode=3' 'TX Test Pattern=10' 'RX Test Pattern=20'",
+   "_comment3": "set TX-RX LB : 'true' 'false'",
+   "_comment4": "freq in hz (1*1000*1000 for 1MHz)",
+   "_comment5": "phase in milli(?) angles (90*1000 for 90 degrees = pi/2)",
+   "_comment6": "scale in micro units (1.0*1000*1000 is 1.0)",
+   "_comment7": "set 0 for one CW tone",
+   "_comment8": "CMOS_lane_sel: 'LANE1=1' 'LANE4=4'",
+
+   "Args": {
+      "device_mode": 0,
+      "src_select": 20,
+      "intl_loopback": false,
+      "CMOS_lane_sel": 1
+   },
+
+   "dds_config": {
+      "dds_frequency_0":1000000,
+      "dds_phase_0":90000,
+      "dds_scale_0":1000000,
+      "dds_frequency_1":1000000,
+      "dds_phase_1":90000,
+      "dds_scale_1":1000000,
+      "dds_dual_tone":0
+   },
+
+}

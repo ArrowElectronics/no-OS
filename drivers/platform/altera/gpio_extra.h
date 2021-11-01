@@ -56,7 +56,8 @@ extern const struct gpio_platform_ops altera_gpio_platform_ops;
  */
 enum gpio_type {
 	/** Nios II architecture */
-	NIOS_II_GPIO
+    NIOS_II_GPIO,
+    ALTERA_GPIO
 };
 
 /**

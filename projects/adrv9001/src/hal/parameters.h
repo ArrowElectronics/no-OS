@@ -42,7 +42,7 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include "xparameters.h"
+//#include "xparameters.h"
 
 /******************************************************************************/
 /********************** Macros and Constants Definitions **********************/
@@ -64,6 +64,8 @@
 /* SPI */
 #define SPI_CS				0
 
+#ifdef NIIOS2
+
 #ifdef XPS_BOARD_ZCU102
 #define SPI_DEVICE_ID			XPAR_PSU_SPI_0_DEVICE_ID
 #define GPIO_DEVICE_ID			XPAR_PSU_GPIO_0_DEVICE_ID
@@ -82,7 +84,6 @@
 
 /* Interrupt */
 #define INTC_DEVICE_ID			XPAR_SCUGIC_SINGLE_DEVICE_ID
-#endif
 
 /* DMA Controller */
 #define RX1_DMA_BASEADDR		XPAR_AXI_ADRV9001_RX1_DMA_BASEADDR
@@ -102,3 +103,35 @@
 #define RX2_ADC_BASEADDR		(XPAR_AXI_ADRV9001_BASEADDR + 0x1000)
 #define TX1_DAC_BASEADDR		(XPAR_AXI_ADRV9001_BASEADDR + 0x2000)
 #define TX2_DAC_BASEADDR		(XPAR_AXI_ADRV9001_BASEADDR + 0x4000)
+
+#elif ALTERA_ADRV9001_NO_OS
+
+
+#define SPI_DEVICE_ID			0 //XPAR_PS7_SPI_0_DEVICE_ID
+#define GPIO_DEVICE_ID			0 //XPAR_PS7_GPIO_0_DEVICE_ID
+
+
+
+/* DMA Controller */
+#define RX1_DMA_BASEADDR		0xff240000 //XPAR_AXI_ADRV9001_RX1_DMA_BASEADDR
+#define RX2_DMA_BASEADDR		0xff240000 //XPAR_AXI_ADRV9001_RX2_DMA_BASEADDR
+#define TX1_DMA_BASEADDR		0xff240800 //XPAR_AXI_ADRV9001_TX1_DMA_BASEADDR
+#define TX2_DMA_BASEADDR		0xff240800 //XPAR_AXI_ADRV9001_TX2_DMA_BASEADDR
+
+/* Memory */
+#define DDR_MEM_BASEADDR		0x00100000 //XPAR_DDR_MEM_BASEADDR
+#define ADC1_DDR_BASEADDR		(DDR_MEM_BASEADDR + 0x800000)
+#define ADC2_DDR_BASEADDR		(DDR_MEM_BASEADDR + 0x900000)
+#define DAC1_DDR_BASEADDR		(DDR_MEM_BASEADDR + 0xA000000)
+#define DAC2_DDR_BASEADDR		(DDR_MEM_BASEADDR + 0xA100000)
+
+/* AXI ADC/DAC */
+#define RX1_ADC_BASEADDR		0xff230000
+#define RX2_ADC_BASEADDR		(RX1_ADC_BASEADDR + 0x1000)
+#define TX1_DAC_BASEADDR		(RX1_ADC_BASEADDR + 0x2000)
+#define TX2_DAC_BASEADDR		(RX1_ADC_BASEADDR + 0x4000)
+
+#define DAC_DMA_EXAMPLE			1 //added
+
+#endif
+#endif

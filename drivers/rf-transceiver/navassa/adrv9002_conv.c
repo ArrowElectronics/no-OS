@@ -40,7 +40,6 @@
 #include <errno.h>
 #include <string.h>
 #include "util.h"
-#include "print_log.h"
 #include "delay.h"
 #include "adrv9002.h"
 #include "axi_adc_core.h"
@@ -120,7 +119,7 @@ int adrv9002_axi_interface_set(struct adrv9002_rf_phy *phy,
 		reg_ctrl |= NUM_LANES(1);
 		tx_reg_ctrl |= NUM_LANES(1);
 		if (phy->ssi_type == ADI_ADRV9001_SSI_TYPE_CMOS) {
-			rate = cmos_ddr ? 3 : 7;
+            rate = cmos_ddr ? 3 : 31;
 			reg_ctrl |= SDR_DDR(!cmos_ddr);
 			tx_reg_ctrl |= SDR_DDR(!cmos_ddr);
 		} else {
@@ -141,7 +140,7 @@ int adrv9002_axi_interface_set(struct adrv9002_rf_phy *phy,
 
 		reg_ctrl |= NUM_LANES(4);
 		tx_reg_ctrl |= NUM_LANES(4);
-		rate = cmos_ddr ? 0 : 1;
+        rate = cmos_ddr ? 0 : 7;
 		reg_ctrl |= SDR_DDR(!cmos_ddr);
 		tx_reg_ctrl |= SDR_DDR(!cmos_ddr);
 		break;
@@ -689,5 +688,19 @@ int adrv9002_post_setup(struct adrv9002_rf_phy *phy)
 		return ret;
 
 	/* start interface tuning */
-	return adrv9002_intf_tuning(phy);
+    return adrv9002_intf_tuning(phy);
 }
+
+int adrv9002_Ssi_Loopback_Set(struct adrv9002_rf_phy *phy, bool enable)
+{
+    int ret,c;
+
+    for (c = 0; c < ADRV9002_CHANN_MAX; c++) {
+        ret = adi_adrv9001_Ssi_Loopback_Set(phy->adrv9001, phy->tx_channels[c].channel.number,
+                                            phy->ssi_type, enable);
+        if (ret)
+            return adrv9002_dev_err(phy);
+    }
+
+    return 0;
+};

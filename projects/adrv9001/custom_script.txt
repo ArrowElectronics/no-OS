@@ -1,0 +1,6 @@
+fatload mmc 0:1 $fpgadata output_files/soc_system.rbf;
+fpga load 0 $fpgadata $filesize;
+run bridge_enable_handoff;
+fatload mmc 0:1 0x0010000 argsConfig.json;
+fatload mmc 0:1 0x00100040 hwlib.bin;
+go 0x00100040;

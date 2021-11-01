@@ -75,6 +75,8 @@ int32_t no_os_hw_open(void *devHalCfg)
 #if defined(ADRV9002_RX2TX2)
 	struct gpio_init_param gip_gpio_ssi_sync;
 #endif
+
+#ifdef NIIOS2
 	struct xil_gpio_init_param gip_extra = {
 #ifdef PLATFORM_MB
 		.type = GPIO_PL,
@@ -90,13 +92,28 @@ int32_t no_os_hw_open(void *devHalCfg)
 		.type = SPI_PS,
 #endif
 		.flags = 0
-	};
+    };
+#elif ALTERA_ADRV9001_NO_OS
 
+    struct altera_gpio_init_param gip_extra = {
+                    .device_id = GPIO_DEVICE_ID,
+                    .type = ALTERA_GPIO,
+                    .base_address = 0xff241000
+            };
+            struct altera_spi_init_param sip_extra = {
+                    .base_address = 0xff220060,
+                    .type = ALTERA_SPI
+            };
+#endif
 	/* Reset GPIO configuration */
 	gip_gpio_reset.number = GPIO_RESET;
 	gip_gpio_reset.extra = &gip_extra;
+#ifdef NIIOS2
 	gip_gpio_reset.platform_ops = &xil_gpio_platform_ops;
-	ret = gpio_get(&phal->gpio_reset_n, &gip_gpio_reset);
+#elif ALTERA_ADRV9001_NO_OS
+    gip_gpio_reset.platform_ops = &altera_gpio_platform_ops;
+#endif
+    ret = gpio_get(&phal->gpio_reset_n, &gip_gpio_reset);
 	if (ret)
 		return ret;
 
@@ -108,7 +125,7 @@ int32_t no_os_hw_open(void *devHalCfg)
 	/* SSI Sync GPIO configuration */
 	gip_gpio_ssi_sync.number = GPIO_SSI_SYNC;
 	gip_gpio_ssi_sync.extra = &gip_extra;
-	gip_gpio_ssi_sync.platform_ops = &xil_gpio_platform_ops;
+    gip_gpio_ssi_sync.platform_ops = &altera_gpio_platform_ops;
 	ret = gpio_get(&phal->gpio_ssi_sync, &gip_gpio_ssi_sync);
 	if (ret < 0)
 		return ret;
@@ -117,6 +134,8 @@ int32_t no_os_hw_open(void *devHalCfg)
 	if (ret)
 		return ret;
 #endif
+
+#ifdef NIIOS2
 	struct spi_init_param sip = {
 		.device_id = SPI_DEVICE_ID,
 		.max_speed_hz = 20000000,
@@ -125,6 +144,16 @@ int32_t no_os_hw_open(void *devHalCfg)
 		.platform_ops = &xil_platform_ops,
 		.extra = &sip_extra
 	};
+#elif ALTERA_ADRV9001_NO_OS
+    struct spi_init_param sip = {
+        .device_id = SPI_DEVICE_ID,
+        .max_speed_hz = 20000000,
+        .mode = SPI_MODE_0,
+        .chip_select = SPI_CS,
+        .platform_ops = &altera_platform_ops,
+        .extra = &sip_extra
+    };
+#endif
 	ret = spi_init(&phal->spi, &sip);
 	if (ret)
 		return ret;
@@ -201,7 +230,7 @@ int32_t no_os_hw_reset(void *devHalCfg, uint8_t pinLevel)
  * @retval ADI_COMMON_ERR_NULL_PARAM the function has been called with a null pointer
  * @retval ADI_COMMON_ERR_API_FAIL the data was not written successfully
  */
-int32_t no_os_spi_write(void *devHalCfg, const uint8_t txData[],
+int32_t no_os_spi_write(void *devHalCfg, uint8_t txData[],
 			uint32_t numTxBytes)
 {
 	static const int32_t MAX_SIZE = 4096;
@@ -381,7 +410,7 @@ int32_t no_os_log_write(void *devHalCfg, uint32_t log_level,
 	case ADI_LOGLEVEL_WARN:
 	case ADI_LOGLEVEL_ERROR:
 	case ADI_LOGLEVEL_FATAL:
-		vprintf(fmt, argp);
+        vprintf(fmt, argp);
 		break;
 	}
 
@@ -427,10 +456,14 @@ int32_t no_os_image_page_get(void *devHalCfg, const char *ImagePath,
 			return -EINVAL;
 
 		bin = Navassa_EvaluationFw_bin;
-	} else if (!strcmp(ImagePath, "Navassa_Stream.bin")) {
-		if ((pageIndex * pageSize) > sizeof(Navassa_Stream_bin))
+	} else if (!strcmp(ImagePath, "Navassa_Stream_L1.bin")) {
+		if ((pageIndex * pageSize) > sizeof(Navassa_Stream_bin_L1))
 			return -EINVAL;
-		bin = Navassa_Stream_bin;
+		bin = Navassa_Stream_bin_L1;
+	} else if (!strcmp(ImagePath, "Navassa_Stream_L4.bin")) {
+		if ((pageIndex * pageSize) > sizeof(Navassa_Stream_bin_L4))
+			return -EINVAL;
+		bin = Navassa_Stream_bin_L4;
 	} else
 		return ADI_COMMON_ERR_INV_PARAM;
 
@@ -498,7 +531,7 @@ int32_t (*adi_adrv9001_hal_resetbPin_set)(void *devHalCfg,
 		uint8_t pinLevel) = no_os_hw_reset;
 
 /* SPI Interface */
-int32_t (*adi_hal_SpiWrite)(void *devHalCfg, const uint8_t txData[],
+int32_t (*adi_hal_SpiWrite)(void *devHalCfg, uint8_t txData[],
 			    uint32_t numTxBytes) = no_os_spi_write;
 int32_t (*adi_hal_SpiRead)(void *devHalCfg, const uint8_t txData[],
 			   uint8_t rxData[], uint32_t numRxBytes) = no_os_spi_read;

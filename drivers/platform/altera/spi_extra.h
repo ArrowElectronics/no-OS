@@ -51,7 +51,8 @@
  */
 enum spi_type {
 	/** Nios II architecture */
-	NIOS_II_SPI
+    NIOS_II_SPI,
+    ALTERA_SPI
 };
 
 /**

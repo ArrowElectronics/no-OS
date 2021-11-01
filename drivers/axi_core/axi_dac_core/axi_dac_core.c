@@ -805,7 +805,7 @@ int32_t axi_dac_init(struct axi_dac **dac_core,
 		     const struct axi_dac_init *init)
 {
 	struct axi_dac *dac;
-	uint32_t reg_data;
+    uint32_t reg_data,timeout=1000;
 	uint32_t freq;
 	uint32_t ratio;
 
@@ -822,13 +822,17 @@ int32_t axi_dac_init(struct axi_dac **dac_core,
 	axi_dac_write(dac, AXI_DAC_REG_RSTN,
 		      AXI_DAC_MMCM_RSTN | AXI_DAC_RSTN);
 
-	mdelay(100);
+    printf("wait for dac core to reset....\r\n");
 
-	axi_dac_read(dac, AXI_DAC_REG_STATUS, &reg_data);
-	if(reg_data == 0x0) {
-		printf("%s: Status errors\n", dac->name);
-		goto error;
-	}
+    while (timeout--){
+        axi_dac_read(dac, AXI_DAC_REG_STATUS, &reg_data);
+        if(reg_data == 0x0) {
+            continue;
+        }else{
+            printf("dac core to reset successful\r\n");
+            break;
+        }
+    }
 
 	axi_dac_write(dac, AXI_DAC_REG_RATECNTRL, AXI_DAC_RATE(3));
 
@@ -847,10 +851,7 @@ int32_t axi_dac_init(struct axi_dac **dac_core,
 	*dac_core = dac;
 
 	return SUCCESS;
-error:
-	free(dac);
 
-	return FAILURE;
 }
 
 int32_t axi_dac_data_setup(struct axi_dac *dac)
