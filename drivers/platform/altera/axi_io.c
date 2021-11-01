@@ -41,7 +41,11 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 
-#include <io.h>
+#ifdef ALTERA_ADRV9001_NO_OS
+#include "socal.h"
+#endif
+
+//#include <io.h>
 #include "error.h"
 #include "axi_io.h"
 
@@ -58,7 +62,11 @@
  */
 int32_t axi_io_read(uint32_t base, uint32_t offset, uint32_t *data)
 {
+#ifdef NIIOS2
 	*data = IORD_32DIRECT(base, offset);
+#elif ALTERA_ADRV9001_NO_OS
+    *data = alt_read_word(base + offset);
+#endif
 
 	return SUCCESS;
 }
@@ -72,8 +80,11 @@ int32_t axi_io_read(uint32_t base, uint32_t offset, uint32_t *data)
  */
 int32_t axi_io_write(uint32_t base, uint32_t offset, uint32_t data)
 {
+#ifdef NIIOS2
 	IOWR_32DIRECT(base, offset, data);
-
+#elif ALTERA_ADRV9001_NO_OS
+    alt_write_word(base + offset, data);
+#endif
 	return SUCCESS;
 }
 

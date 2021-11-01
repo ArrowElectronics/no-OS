@@ -39,7 +39,6 @@
 #include <stdint.h>
 #include "error.h"
 #include "util.h"
-#include "print_log.h"
 #include "delay.h"
 #include "adrv9002.h"
 #include "adi_adrv9001.h"
@@ -392,6 +391,10 @@ static int adrv9002_tx_path_config(struct adrv9002_rf_phy *phy,
 		if (ret)
 			return adrv9002_dev_err(phy);
 
+        ret=adi_adrv9001_Tx_Attenuation_Set(phy->adrv9001,tx->channel.number, 24000);
+        if (ret)
+            return adrv9002_dev_err(phy);
+
 rf_enable:
 		ret = adi_adrv9001_Radio_Channel_ToState(phy->adrv9001, ADI_TX,
 				tx->channel.number, state);
@@ -545,6 +548,22 @@ static int adrv9002_digital_init(struct adrv9002_rf_phy *phy)
 	uint8_t mask = 0;
 	const uint32_t valid_profiles = phy->adrv9001->devStateInfo.profilesValid;
 	const uint32_t channels = phy->adrv9001->devStateInfo.initializedChannels;
+    adi_adrv9001_SsiNumLane_e laneSel;
+    adi_adrv9001_SsiType_e lane_ssiType;
+    lane_ssiType = phy->curr_profile->rx.rxChannelCfg[0].profile.rxSsiConfig.ssiType;
+    laneSel = phy->curr_profile->rx.rxChannelCfg[0].profile.rxSsiConfig.numLaneSel;
+
+    switch (lane_ssiType) {
+    case ADI_ADRV9001_SSI_TYPE_CMOS:
+        printf("###### ADI_ADRV9001_SSI_TYPE_CMOS ######\r\n");
+        break;
+    case ADI_ADRV9001_SSI_TYPE_LVDS:
+        printf("###### ADI_ADRV9001_SSI_TYPE_LVDS ######\r\n");
+        break;
+    default:
+        printf("###### Error wrong SSI_TYPE please check your JSON profile ######\r\n");
+        return adrv9002_dev_err(phy);
+    }
 
 	ret = adi_adrv9001_arm_AhbSpiBridge_Enable(phy->adrv9001);
 	if (ret)
@@ -561,10 +580,31 @@ static int adrv9002_digital_init(struct adrv9002_rf_phy *phy)
 		ret = adi_adrv9001_Stream_Image_Write(phy->adrv9001, 0, phy->stream_buf,
 						      phy->stream_size,
 						      ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
-	else
-		ret = adi_adrv9001_Utilities_StreamImage_Load(phy->adrv9001,
-				"Navassa_Stream.bin",
-				ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+	else{
+
+        switch (laneSel) {
+
+        case ADI_ADRV9001_SSI_4_LANE:
+            printf("###### ADI_ADRV9001_SSI_4_LANE ######\r\n");
+            ret = adi_adrv9001_Utilities_StreamImage_Load(phy->adrv9001,
+                                                          "Navassa_Stream_L4.bin",
+                                                          ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+            break;
+        case ADI_ADRV9001_SSI_1_LANE:
+            printf("###### ADI_ADRV9001_SSI_1_LANE ######\r\n");
+            ret = adi_adrv9001_Utilities_StreamImage_Load(phy->adrv9001,
+                                                          "Navassa_Stream_L1.bin",
+                                                          ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+            break;
+        case ADI_ADRV9001_SSI_2_LANE:
+            printf("#### TODO ######\r\n");
+            return adrv9002_dev_err(phy);
+            break;
+        default:
+            printf("###### Error wrong SSI_LANE please check your JSON profile ######\r\n");
+        }
+    }
+
 	if (ret)
 		return adrv9002_dev_err(phy);
 
@@ -627,7 +667,7 @@ static int adrv9002_digital_init(struct adrv9002_rf_phy *phy)
 	if (ret)
 		return adrv9002_dev_err(phy);
 
-	ret = adi_adrv9001_arm_StartStatus_Check(phy->adrv9001, 5000000);
+    ret = adi_adrv9001_arm_StartStatus_Check(phy->adrv9001, 5000000);
 	if (ret)
 		return adrv9002_dev_err(phy);
 
@@ -846,7 +886,7 @@ static int adrv9002_radio_init(struct adrv9002_rf_phy *phy)
 		if (c->port == ADI_RX)
 			carrier.carrierFrequency_Hz = 2400000000ULL;
 		else
-			carrier.carrierFrequency_Hz = 2450000000ULL;
+            carrier.carrierFrequency_Hz = 2400000000ULL;
 
 		ret = adi_adrv9001_Radio_Carrier_Configure(phy->adrv9001, c->port, c->number,
 				&carrier);
@@ -883,7 +923,7 @@ int adrv9002_setup(struct adrv9002_rf_phy *phy,
 	adi_adrv9001_gpMaskArray_t gp_mask;
 	adi_adrv9001_ChannelState_e init_state;
 
-	phy->curr_profile = adrv9002_init;
+    phy->curr_profile = adrv9002_init;
 
 	phy->ssi_type =
 		phy->curr_profile->rx.rxChannelCfg[0].profile.rxSsiConfig.ssiType;
@@ -948,7 +988,7 @@ int adrv9002_setup(struct adrv9002_rf_phy *phy,
 		return ret;
 
 	ret = adi_adrv9001_cals_InitCals_Run(adrv9001_device, &phy->init_cals,
-					     60000, &init_cals_error);
+                         60000, &init_cals_error);
 	if (ret)
 		return adrv9002_dev_err(phy);
 

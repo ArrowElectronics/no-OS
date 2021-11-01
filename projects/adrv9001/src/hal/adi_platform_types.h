@@ -45,7 +45,7 @@
  * Log level events to be compiled into the device driver. Less severe logging calls will not be included, reducing
  * code size
  */
-#define ADI_COMPILED_LOGLEVEL ADI_LOGLEVEL_WARN
+#define ADI_COMPILED_LOGLEVEL ADI_LOGLEVEL_INFO
 #endif // !ADI_COMPILED_LOGLEVEL
 
 

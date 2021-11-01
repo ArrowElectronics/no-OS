@@ -489,7 +489,6 @@ int32_t axi_adc_init(struct axi_adc **adc_core,
 			      AXI_ADC_FORMAT_SIGNEXT | AXI_ADC_FORMAT_ENABLE |
 			      AXI_ADC_ENABLE);
 
-	mdelay(100);
 
 	axi_adc_read(adc, AXI_ADC_REG_STATUS, &reg_data);
 	if(reg_data == 0x0) {

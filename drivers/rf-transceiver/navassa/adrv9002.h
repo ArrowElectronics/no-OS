@@ -41,6 +41,8 @@
 
 #include "gpio.h"
 #include "delay.h"
+#include "print_log.h"
+
 
 #include "adi_common_log.h"
 #include "adi_adrv9001_user.h"
@@ -49,6 +51,8 @@
 #include "adi_adrv9001_rx_gaincontrol_types.h"
 #include "adi_adrv9001_rxSettings_types.h"
 #include "adi_adrv9001_ssi_types.h"
+#include "axi_core_rxtx.h"
+
 
 #include "no_os_platform.h"
 
@@ -200,17 +204,18 @@ struct adrv9002_rf_phy {
 #ifdef CONFIG_DEBUG_FS
 	struct adi_adrv9001_SsiCalibrationCfg ssi_delays;
 #endif
-	struct axi_adc			*rx1_adc;
-	struct axi_dac			*tx1_dac;
-	struct axi_adc			*rx2_adc;
-	struct axi_dac			*tx2_dac;
-	struct axi_dmac			*rx1_dmac;
-	struct axi_dmac			*tx1_dmac;
-	struct axi_dmac			*rx2_dmac;
-	struct axi_dmac			*tx2_dmac;
+    struct axi_adc			*rx1_adc;
+    struct axi_dac			*tx1_dac;
+    struct axi_adc			*rx2_adc;
+    struct axi_dac			*tx2_dac;
+    struct axi_dmac			*rx1_dmac;
+    struct axi_dmac			*tx1_dmac;
+    struct axi_dmac			*rx2_dmac;
+    struct axi_dmac			*tx2_dmac;
 };
 
 int adrv9002_post_setup(struct adrv9002_rf_phy *phy);
+int adrv9002_Ssi_Loopback_Set(struct adrv9002_rf_phy *phy, bool enable);
 int adrv9002_setup(struct adrv9002_rf_phy *phy,
 		   adi_adrv9001_Init_t *adrv9002_init);
 adi_adrv9001_SsiType_e adrv9002_axi_ssi_type_get(struct adrv9002_rf_phy *phy);
@@ -256,7 +261,7 @@ uint32_t adrv9002_axi_dds_rate_get(struct adrv9002_rf_phy *phy, const int chan);
 
 /* get init structs */
 struct adi_adrv9001_SpiSettings *adrv9002_spi_settings_get(void);
-struct adi_adrv9001_Init *adrv9002_init_get(void);
+struct adi_adrv9001_Init *adrv9002_init_get(uint8_t lane_sel);
 struct adi_adrv9001_GainControlCfg *adrv9002_agc_settings_get(void);
 
 static inline void adrv9002_sync_gpio_toogle(const struct adrv9002_rf_phy *phy)

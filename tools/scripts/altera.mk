@@ -31,84 +31,32 @@ PLATFORM_FULL_PATH = $1
 
 OBJECTS_DIR	= $(BUILD_DIR)/obj
 TEMP_DIR	= $(BUILD_DIR)/tmp
-BINARY		= $(BUILD_DIR)/$(PROJECT_NAME).elf
+ELF		= $(BUILD_DIR)/$(PROJECT_NAME).elf
+BINARY          = $(BUILD_DIR)/$(PROJECT_NAME).bin
 
 # Define the platform compiler switch
 CFLAGS += -D ALTERA_PLATFORM
 
-LSCRIPT = $(BUILD_DIR)/bsp/linker.x
+#LSCRIPT = $(SOCEDS_DEST_ROOT)/host_tools/mentor/gnu/arm/baremetal/arm-altera-eabi/lib/cortex-a9/cycloneV-dk-ram.ld
+LSCRIPT = $(NO-OS)/tools/scripts/platform/altera/cycloneV-dk-ram-modified.ld
+#LIB_PATHS += -L$(BUILD_DIR)/bsp
 
-LIB_PATHS += -L$(BUILD_DIR)/bsp
+CROSS_COMPILE=arm-altera-eabi-
+CC := $(CROSS_COMPILE)gcc
+LD := $(CROSS_COMPILE)g++
+NM := $(CROSS_COMPILE)nm
+OC := $(CROSS_COMPILE)objcopy
+OD := $(CROSS_COMPILE)objdump
 
-CC = nios2-elf-gcc 
-
-LD = nios2-elf-g++
 
 CFLAGS += -xc								\
 	  -pipe								\
 	  -O3								\
 	  -g								\
-	  -mno-hw-div							\
-	  -mhw-mul							\
-	  -mno-hw-mulx							\
-	  -mgpopt=global						\
-	  -D__hal__							\
-	  -DALT_NO_INSTRUCTION_EMULATION 				\
-	  -DALTERA_TRIPLE_SPEED_MAC 					\
-	  -DALT_SINGLE_THREADED 					\
-	  -DALTERA_AUTONEG_TIMEOUT_THRESHOLD=2500 			\
-	  -DALTERA_CHECKLINK_TIMEOUT_THRESHOLD=10000 			\
-	  -DALTERA_NOMDIO_TIMEOUT_THRESHOLD=1000000  			\
-	  -DALTERA							\
-	  -DNIOS_II
-
-LDFLAGS += -msys-crt0='$(BUILD_DIR)/bsp//obj/HAL/src/crt0.o'		\
-	   -msys-lib=hal_bsp 						\
-	   -DALTERA							\
-	   -DNIOS_II							\
-	   -mno-hw-div							\
-	   -mhw-mul							\
-	   -mno-hw-mulx							\
-	   -mgpopt=global						\
-	   -lm								\
-	   -msys-lib=m							\
-	   -Wl,-Map=sw.map
-
-STAMP +=   --thread_model hal						\
-	   --cpu_name sys_cpu						\
-	   --qsys true							\
-	   --simulation_enabled false					\
-	   --id 182193580						\
-	   --sidp 0x101814e8						\
-	   --timestamp 1520874786					\
-	   --stderr_dev sys_uart					\
-	   --stdin_dev sys_uart						\
-	   --stdout_dev sys_uart					\
-	   --sopc_system_name system_bd					\
-	   --sopcinfo $(HARDWARE)
-
-CFLAGS += -I"$(BUILD_DIR)/bsp/HAL/inc/sys"			\
-		-I"$(BUILD_DIR)/bsp/drivers/inc"		\
-		-I"$(BUILD_DIR)/bsp/HAL/inc"			\
-		-I"$(BUILD_DIR)/bsp"	
-
-#------------------------------------------------------------------------------
-#                             Goals                         
-#------------------------------------------------------------------------------
+          -mcpu=cortex-a9                                               \
+          -mfloat-abi=softfp                                            \
+          -mfpu=neon
 
 
-PHONY += altera_run
-altera_run: all
-	$(WSL) nios2-configure-sof *.sof
-	$(WSL) nios2-download -r -g $(BINARY)
-	nios2-terminal
+LDFLAGS += -lm
 
-$(PROJECT_TARGET):
-	$(WSL) nios2-bsp hal "$(BUILD_DIR)/bsp" $(HARDWARE) --cpu-name sys_cpu
-	$(WSL) $(MAKE) CFLAGS= -C $(call adjust_path, $(BUILD_DIR)/bsp)
-	$(call set_one_time_rule,$@)
-
-post_build:
-	$(WSL) nios2-elf-insert $(BINARY) $(STAMP)
-	-$(call copy_fun,sw.map,$(TEMP_DIR))
-	-$(call remove_fun, sw.map)

@@ -15,6 +15,9 @@
 #include "adi_adrv9001_arm.h"
 #include "adrv9001_arm_macros.h"
 
+uint8_t modesData[ADI_ADRV9001_NUM_LDOS] = { 0 };
+uint8_t configData[ADI_ADRV9001_NUM_LDOS_CONFIGURABLE * 6] = { 0 };
+
 static int32_t adi_adrv9001_ldo_Configure_Validate(adi_adrv9001_Device_t *adrv9001,
                                                    adi_adrv9001_PowerManagementSettings_t *powerManagementSettings)
 {
@@ -70,9 +73,11 @@ int32_t adi_adrv9001_powermanagement_Configure(adi_adrv9001_Device_t *adrv9001,
     uint32_t ldoPowerSavingModesAddr = 0;
     uint32_t ldoConfigsAddr = 0;
     uint8_t i = 0;
-    uint8_t modesData[ADI_ADRV9001_NUM_LDOS] = { 0 };
-    uint8_t configData[ADI_ADRV9001_NUM_LDOS_CONFIGURABLE * 6] = { 0 };
-    
+    //uint8_t modesData[ADI_ADRV9001_NUM_LDOS] = { 0 };
+    //uint8_t configData[ADI_ADRV9001_NUM_LDOS_CONFIGURABLE * 6] = { 0 };
+   // printf("in %s E1\r\n",__func__);
+
+
     ADI_PERFORM_VALIDATION(adi_adrv9001_ldo_Configure_Validate, adrv9001, powerManagementSettings);
     
     ADI_EXPECT(adi_adrv9001_arm_Memory_Read, adrv9001, LDO_POWER_SAVING_MODES_LOCATION, addrData, sizeof(addrData), ADI_ADRV9001_ARM_MEM_AUTO_INCR);

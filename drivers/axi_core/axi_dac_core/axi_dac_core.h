@@ -73,6 +73,7 @@ enum axi_dac_data_sel {
 	AXI_DAC_DATA_SEL_PN31,
 	AXI_DAC_DATA_SEL_LB,
 	AXI_DAC_DATA_SEL_PNXX,
+    AXI_DAC_DATA_SEL_RAMP_NIBBLE,
 };
 
 struct axi_dac_channel {

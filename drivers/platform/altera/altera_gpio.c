@@ -42,11 +42,11 @@
 /******************************************************************************/
 
 #include <stdlib.h>
-#include <altera_avalon_spi_regs.h>
 #include "gpio.h"
 #include "gpio_extra.h"
 #include "error.h"
 #include "parameters.h"
+#include "axi_io.h"
 
 /**
  * @brief Altera platform specific GPIO platform ops structure
@@ -220,7 +220,16 @@ int32_t altera_gpio_set_value(struct gpio_desc *desc,
 		IOWR_32DIRECT(altera_desc->base_address,
 			      0x0, ((pdata & ~pmask) | (value << ppos)));
 
-		break;
+        break;
+    case ALTERA_GPIO:
+        ppos = desc->number - 32;
+        pmask = 0x1 << ppos;
+
+        axi_io_read(altera_desc->base_address, 0x0, &pdata);
+        axi_io_write(altera_desc->base_address,
+                     0x0, ((pdata & ~pmask) | (value << ppos)));
+
+        break;
 	default:
 		return FAILURE;
 	}
@@ -259,6 +268,13 @@ int32_t altera_gpio_get_value(struct gpio_desc *desc,
 		*value = (pdata >> ppos) & 0x01;
 
 		break;
+    case ALTERA_GPIO:
+        ppos = desc->number - 32;
+
+        axi_io_read(altera_desc->base_address, 0x0, &pdata);
+        *value = (pdata >> ppos) & 0x01;
+
+        break;
 	default:
 		return FAILURE;
 	}

@@ -12,24 +12,37 @@
 SRCS += $(DRIVERS)/rf-transceiver/navassa/adrv9002_init_data.c \
 	$(DRIVERS)/rf-transceiver/navassa/adrv9002_conv.c \
 	$(DRIVERS)/rf-transceiver/navassa/adrv9002.c \
-	$(PROJECT)/src/app/headless.c
+        $(PROJECT)/src/app/axi_core_rxtx.c \
+        $(PROJECT)/src/app/app_main.c \
+        $(PROJECT)/src/app/main.c
 INCS += $(DRIVERS)/rf-transceiver/navassa/adrv9002.h \
+        $(DRIVERS)/rf-transceiver/navassa/devices/adrv9001/public/include/adi_adrv9001_profileutil.h \
 	$(PROJECT)/src/app/ORxGainTable.h \
 	$(PROJECT)/src/app/RxGainTable.h \
-	$(PROJECT)/src/app/TxAttenTable.h
+        $(PROJECT)/src/app/TxAttenTable.h \
+        $(PROJECT)/src/app/axi_core_rxtx.h \
+        $(PROJECT)/src/app/app_main.h
 # hal
-SRCS += $(PROJECT)/src/hal/no_os_platform.c
+SRCS += $(PROJECT)/src/hal/no_os_platform.c \
+        $(PROJECT)/src/hal/io.c \
+        $(PROJECT)/src/hal/alt_cache/alt_cache.c
 INCS += $(PROJECT)/src/hal/parameters.h \
 	$(PROJECT)/src/hal/no_os_platform.h \
 	$(PROJECT)/src/hal/adi_platform.h \
 	$(PROJECT)/src/hal/adi_platform_types.h \
 	$(PROJECT)/src/firmware/Navassa_EvaluationFw.h \
-	$(PROJECT)/src/firmware/Navassa_Stream.h
+        $(PROJECT)/src/firmware/Navassa_Stream.h \
+        $(PROJECT)/src/hal/alt_cache/alt_cache.h \
+        $(PROJECT)/src/hal/alt_cache/alt_interrupt_common.h \
+        $(PROJECT)/src/hal/alt_cache/alt_mmu.h \
+        $(PROJECT)/src/hal/alt_cache/alt_sysmgr.h \
+        $(PROJECT)/src/hal/alt_cache/hwlib.h \
+        $(PROJECT)/src/hal/alt_cache/alt_int_device.h
 # no-OS drivers
-SRCS += $(PLATFORM_DRIVERS)/xilinx_gpio.c \
+SRCS += $(PLATFORM_DRIVERS)/altera_gpio.c \
+        $(PLATFORM_DRIVERS)/altera_spi.c \
 	$(NO-OS)/drivers/gpio/gpio.c \
 	$(DRIVERS)/spi/spi.c \
-	$(PLATFORM_DRIVERS)/xilinx_spi.c \
 	$(PLATFORM_DRIVERS)/delay.c \
 	$(NO-OS)/util/util.c \
 	$(DRIVERS)/axi_core/axi_adc_core/axi_adc_core.c \
@@ -47,7 +60,12 @@ INCS +=	$(INCLUDE)/spi.h \
 	$(DRIVERS)/axi_core/axi_adc_core/axi_adc_core.h \
 	$(DRIVERS)/axi_core/axi_dac_core/axi_dac_core.h \
 	$(DRIVERS)/axi_core/axi_dmac/axi_dmac.h \
-	$(INCLUDE)/axi_io.h
+        $(INCLUDE)/axi_io.h \
+        $(INCLUDE)/socal.h \
+        $(INCLUDE)/altera_avalon_spi_regs.h \
+        $(INCLUDE)/alt_types.h \
+        $(INCLUDE)/hps.h \
+        $(INCLUDE)/alt_uart.h
 
 # Navassa API sources
 SRC_DIRS += $(DRIVERS)/rf-transceiver/navassa

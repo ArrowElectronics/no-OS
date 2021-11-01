@@ -1,9 +1,9 @@
 /***************************************************************************//**
- *   @file   altera/delay.c
- *   @brief  Implementation of Altera Delay Functions.
- *   @author Antoniu Miclaus (antoniu.miclaus@analog.com)
+ *   @file   axi_core_rxtx.h
+ *   @brief  adrv9002 axi core defaults project header file.
+ *   @author Darius Berghe (darius.berghe@analog.com)
 ********************************************************************************
- * Copyright 2019(c) Analog Devices, Inc.
+ * Copyright 2020(c) Analog Devices, Inc.
  *
  * All rights reserved.
  *
@@ -37,32 +37,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/******************************************************************************/
-/***************************** Include Files **********************************/
-/******************************************************************************/
 
-#include "delay.h"
+#ifndef AXI_CORE_RXTX_H
+#define AXI_CORE_RXTX_H
 
-/******************************************************************************/
-/************************ Functions Definitions *******************************/
-/******************************************************************************/
+#include "axi_adc_core.h"
+#include "axi_dac_core.h"
+#include "axi_dmac.h"
+#include "parameters.h"
 
-/**
- * @brief Generate microseconds delay.
- * @param usecs - Delay in microseconds.
- * @return None.
- */
-void udelay(uint32_t usecs)
-{
-    //usleep(usecs);
-}
+extern struct axi_dmac_init *rx_dmac_init_defaults[];
+extern struct axi_dmac_init *tx_dmac_init_defaults[];
+extern struct axi_adc_init *rx_adc_init_defaults[];
+extern struct axi_dac_init *tx_dac_init_defaults[];
 
-/**
- * @brief Generate miliseconds delay.
- * @param msecs - Delay in miliseconds.
- * @return None.
- */
-void mdelay(uint32_t msecs)
-{
-    //usleep(msecs * 1000);
-}
+#endif // AXI_CORE_RXTX_H

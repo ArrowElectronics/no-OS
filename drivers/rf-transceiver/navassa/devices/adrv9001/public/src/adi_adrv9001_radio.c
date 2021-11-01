@@ -387,6 +387,8 @@ int32_t adi_adrv9001_Radio_State_Get(adi_adrv9001_Device_t *adrv9001, adi_adrv90
     /* Range checks */
     ADI_ENTRY_PTR_EXPECT(adrv9001, radioState);
 
+    printf("waiting to get ADRV9001_ADDR_ARM_CMD_STATUS_8...\r\n");
+
     ADRV9001_SPIREADBYTE(adrv9001, "arm_cmd_status_8", ADRV9001_ADDR_ARM_CMD_STATUS_8, &regValue);
 
     radioState->systemState         = regValue & 0x03;

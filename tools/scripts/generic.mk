@@ -154,10 +154,10 @@ include $(NO-OS)/tools/scripts/xilinx.mk
 endif
 
 ifeq 'altera' '$(PLATFORM)'
-HARDWARE := $(filter %.sopcinfo, $(HARDWARE))
-ifeq '' '$(HARDWARE)'
-$(error 'No HARDWARE for altera found. Add .sopcinfo file')
-endif
+#HARDWARE := $(filter %.sopcinfo, $(HARDWARE))
+#ifeq '' '$(HARDWARE)'
+#$(error 'No HARDWARE for altera found. Add .sopcinfo file')
+#endif
 include $(NO-OS)/tools/scripts/altera.mk
 endif
 
@@ -185,13 +185,10 @@ CFLAGS += -Wall								\
 	 -Wmissing-field-initializers					\
 	 -Wclobbered 							\
 	 -Wempty-body 							\
-	 -Wignored-qualifiers 						\
 	 -Wmissing-parameter-type					\
 	 -Wno-format  							\
 	 -Wold-style-declaration					\
 	 -Woverride-init 						\
-	 -Wsign-compare							\
-	 -Wtype-limits							\
 	 -Wuninitialized						\
 	 -Wunused-but-set-parameter					\
 	 -Wno-unused-parameter						\
@@ -279,6 +276,7 @@ all: print_build_type
 	$(MUTE) $(MAKE) --no-print-directory update_srcs MAKEFLAGS=$(MAKEOVERRIDES)
 	$(MUTE) $(MAKE) --no-print-directory $(BINARY)
 	$(call print,Done ($(notdir $(BUILD_DIR))/$(notdir $(BINARY))))
+	$(MAKE) run
 endif
 
 PHONY += print_build_type
@@ -318,13 +316,18 @@ endif
 
 $(BINARY): $(LIB_TARGETS) $(OBJS) $(ASM_OBJS) $(LSCRIPT)
 	@$(call print,[LD] $(notdir $(OBJS)))
-	$(MUTE) $(CC) $(LSCRIPT_FLAG) $(LDFLAGS) $(LIB_PATHS) -o $(BINARY) $(OBJS) \
+	$(MUTE) $(LD) $(LSCRIPT_FLAG) $(LDFLAGS) $(LIB_PATHS) -o $(ELF) $(OBJS) \
 			 $(ASM_OBJS) $(LIB_FLAGS)
+	$(MUTE) $(OC) -O binary $(ELF) $(BINARY)
 	$(MUTE) $(MAKE) --no-print-directory post_build
+
+altera_run:
+	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "Custom Script" -d $(PROJECT)/custom_script.txt $(BUILD_DIR)/u-boot.scr
 
 PHONY += run
 run: $(PLATFORM)_run
-	@$(call print,$(notdir $(BINARY)) uploaded to board)
+	$(call print,Done @@@@ copy $(notdir $(BINARY)) to sdcard boot partition @@@@)
+	$(call print,Done @@@@ copy $(notdir $(BUILD_DIR)/u-boot.scr) to sdcard boot partition @@@@)
 
 project: $(PROJECT_TARGET)
 
