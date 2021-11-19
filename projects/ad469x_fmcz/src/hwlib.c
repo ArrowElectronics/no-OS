@@ -150,7 +150,13 @@ int main(int argc, char** argv)
 		return FAILURE;
 
 #ifdef STANDARD_SEQ
-	printf("In Standard Sequencer Mode\r\n");
+	printf("\r\nIn Standard Sequencer Mode\r\n");
+
+	if (!ad469x_init_param.data_mode)
+		printf("Staggered Mode Enabled\r\n");
+	else
+		printf("Continuous Mode Enabled\r\n");
+
 	ret = ad469x_std_sequence_ch(dev, CHANNEL_NUMS);
 	if (ret != SUCCESS)
 		return ret;
@@ -183,11 +189,11 @@ int main(int argc, char** argv)
 	}
 #elif defined(ADVANCED_SEQ)
 	if (ad469x_init_param.data_mode == 1) {
-		printf("Continuous Mode only applicable in Standard Sequencer Mode. Exiting.\r\n");
+		printf("\r\nContinuous Mode only applicable in Standard Sequencer Mode. Exiting.\r\n");
 		return FAILURE;
 	}
 
-	printf("In Advanced Sequencer Mode\r\n");
+	printf("\r\nIn Advanced Sequencer Mode\r\n");
 	ret = ad469x_adv_sequence_set_num_slots(dev, no_of_ones(CHANNEL_NUMS));
 	if (ret != SUCCESS)
 		return ret;
@@ -226,11 +232,11 @@ int main(int argc, char** argv)
 	}
 #else
 	if (ad469x_init_param.data_mode == 1) {
-		printf("Continuous Mode only applicable in Standard Sequencer Mode. Exiting.\r\n");
+		printf("\r\nContinuous Mode only applicable in Standard Sequencer Mode. Exiting.\r\n");
 		return FAILURE;
 	}
 
-	printf("In Single Cycle Mode\r\n");
+	printf("\r\nIn Single Cycle Mode\r\n");
 	uint32_t channel = 0;
 	ret = ad469x_set_channel_sequence(dev, AD469x_single_cycle);
 	if (ret != SUCCESS)

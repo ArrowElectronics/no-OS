@@ -665,7 +665,6 @@ int32_t ad469x_read_data(struct ad469x_dev *dev,
 		ad469x_exit_conversion_mode(dev);
 		ad469x_spi_write_mask(dev, AD469x_REG_SEQ_CTRL,
 				AD469x_SEQ_CTRL_STD_SEQ_EN_MASK, AD469x_SEQ_CTRL_STD_SEQ_EN(1));
-		ad469x_spi_reg_write(dev, AD469x_REG_STD_SEQ_CONFIG + 1, 0xFFFF);
 		ad469x_spi_reg_read(dev, AD469x_REG_STD_SEQ_CONFIG, &val1);
 		ad469x_spi_reg_read(dev, (AD469x_REG_STD_SEQ_CONFIG + 1), &val2);
 		data = (val1 << 8) | val2;
