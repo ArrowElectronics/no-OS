@@ -74,7 +74,7 @@ uint32_t spi_msg_cmds[3] = { CS_LOW, READ(2), CS_HIGH };
 #define SUCCESS		0
 #define FAILURE		-1
 
-#define SPI_ENGINE_OFFLOAD_EXAMPLE	0
+#define SPI_ENGINE_OFFLOAD_EXAMPLE		1
 #define DMA_TRANSFER_SIZE 			1024
 
 int __auto_semihosting;
