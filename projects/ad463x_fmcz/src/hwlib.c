@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 		.reg_data_width = 8,
 		.capture_data_width = 8,
 		.output_mode = AD463X_24_DIFF_8_COM,
-		.lane_mode = AD463X_ONE_LANE_PER_CH,
+		.lane_mode = AD463X_FOUR_LANES_PER_CH,
 		.clock_mode = AD463X_SPI_CLOCK_MODE,
 		.data_rate = AD463X_SDR_MODE,
 		.device_id = ID_AD4630_24, /* dev_id */

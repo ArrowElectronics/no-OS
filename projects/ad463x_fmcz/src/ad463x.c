@@ -464,7 +464,6 @@ int32_t ad463x_read_data(struct ad463x_dev *dev,
 int32_t ad463x_init(struct ad463x_dev **device,
 		    struct ad463x_init_param *init_param)
 {
-	printf("In ad463x_init \r\n");
 	struct ad463x_dev *dev;
 	int32_t ret;
 	uint8_t data = 0;
@@ -601,12 +600,6 @@ int32_t ad463x_init(struct ad463x_dev **device,
 			axi_io_write(dev->spi_engine_baseaddr, CNV_RATE_CONFIG, ad463x_chip_info_tbl[dev->device_id].cnv_rate_1_lane_sdr); // value to calculate as 1000ns*spi_clk_frequency **
 	}
 	axi_io_write(dev->spi_engine_baseaddr, CNV_PULSE_WIDTH, ad463x_chip_info_tbl[dev->device_id].cnv_width); // value to calculate as 250ns*spi_clk_frequency  **
-
-	uint32_t hdl_val = 0;
-	uint8_t reg_val = 0;
-	ad463x_spi_reg_read(dev, AD463X_REG_MODES, &reg_val);
-	axi_io_read(dev->spi_engine_baseaddr, UP_CONFIG_REG, &hdl_val);
-	printf("Mode Register = 0x%x\tHDL Config Register = 0x%lx\r\n", reg_val, hdl_val);
 
 	*device = dev;
 
